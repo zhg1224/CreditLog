@@ -161,11 +161,11 @@ struct CardDetailView: View {
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
 
-                ForEach(topCategories, id: \.self) { category in
+                ForEach(topRewardRows, id: \.id) { row in
                     HStack {
-                        Label(category.title, systemImage: category.systemImage)
+                        Label(row.title, systemImage: row.systemImage)
                         Spacer()
-                        Text(formattedRewardValue(card.reward(for: category)))
+                        Text(formattedRewardValue(row.value))
                             .font(.headline)
                     }
                     .padding(.vertical, 6)
@@ -174,13 +174,14 @@ struct CardDetailView: View {
         }
     }
 
-    private var topCategories: [RewardCategory] {
-        Array(
-            RewardCategory.allCases.sorted {
-                card.reward(for: $0) > card.reward(for: $1)
-            }
-            .prefix(3)
-        )
+    private var topRewardRows: [RewardRow] {
+        var rows = RewardCategory.allCases.map {
+            RewardRow(id: $0.rawValue, title: $0.title, systemImage: $0.systemImage, value: card.reward(for: $0))
+        }
+        rows += RewardCategoryStore.custom().map {
+            RewardRow(id: $0.id, title: $0.title, systemImage: $0.systemImage, value: card.rewardValue(for: $0.id))
+        }
+        return Array(rows.sorted { $0.value > $1.value }.prefix(3))
     }
 
     private func formattedRewardValue(_ value: Double) -> String {
@@ -308,4 +309,12 @@ struct CardDetailView: View {
 
         dismiss()
     }
+}
+
+
+private struct RewardRow: Identifiable {
+    let id: String
+    let title: String
+    let systemImage: String
+    let value: Double
 }
