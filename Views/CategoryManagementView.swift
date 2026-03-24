@@ -2,35 +2,62 @@
 //  CategoryManagementView.swift
 //  CreditLog
 //
-//  Created by Zhao Zhang on 2026-03-24.
-//
 
 import SwiftUI
 
 struct CategoryManagementView: View {
+    @State private var customCategories: [RewardCategoryItem] = RewardCategoryStore.custom()
+    @State private var newCategoryName = ""
+
     var body: some View {
         List {
-            Section("当前内置类别") {
-                ForEach(RewardCategory.allCases) { category in
-                    HStack(spacing: 12) {
-                        Image(systemName: category.systemImage)
-                            .frame(width: 28)
-
-                        Text(category.title)
-
-                        Spacer()
-                    }
-                    .padding(.vertical, 4)
+            Section("当前类别") {
+                ForEach(RewardCategoryItem.builtIns) { category in
+                    categoryRow(category)
                 }
+
+                ForEach(customCategories) { category in
+                    categoryRow(category)
+                }
+                .onDelete(perform: deleteCustomCategory)
             }
 
-            Section {
-                Text("第 3 组会把这里升级成真正可新增 / 删除的类别管理，并同步影响添加卡片、返利推荐和详情页分析。")
-                    .font(.footnote)
-                    .foregroundStyle(.secondary)
+            Section("新增类别") {
+                TextField("例如：酒店、流媒体", text: $newCategoryName)
+                Button("添加类别") { addCategory() }
+                    .disabled(newCategoryName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
             }
         }
         .navigationTitle("类别管理")
         .navigationBarTitleDisplayMode(.inline)
+    }
+
+    private func categoryRow(_ category: RewardCategoryItem) -> some View {
+        HStack(spacing: 12) {
+            Image(systemName: category.systemImage)
+                .frame(width: 28)
+            Text(category.title)
+            Spacer()
+            if category.isBuiltIn {
+                Text("内置")
+                    .foregroundStyle(.secondary)
+                    .font(.caption)
+            }
+        }
+        .padding(.vertical, 4)
+    }
+
+    private func addCategory() {
+        let title = newCategoryName.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !title.isEmpty else { return }
+        let id = "custom_\(UUID().uuidString)"
+        customCategories.append(.init(id: id, title: title, systemImage: "tag.fill", isBuiltIn: false))
+        RewardCategoryStore.save(custom: customCategories)
+        newCategoryName = ""
+    }
+
+    private func deleteCustomCategory(at offsets: IndexSet) {
+        customCategories.remove(atOffsets: offsets)
+        RewardCategoryStore.save(custom: customCategories)
     }
 }

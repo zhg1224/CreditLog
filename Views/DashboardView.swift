@@ -148,7 +148,7 @@ struct DashboardView: View {
                 SettingsView()
             }
             .sheet(isPresented: $showFilterSheet) {
-                DashboardFilterSheet(filter: $dashboardFilter)
+                DashboardFilterSheet(filter: $dashboardFilter, issuerOptions: Array(Set(cards.map { $0.issuerBank })).sorted())
             }
             .sheet(item: $selectedCardForEdit) { card in
                 EditCardView(card: card)
@@ -252,15 +252,21 @@ private struct DashboardFilterSheet: View {
     @Binding var filter: DashboardFilter
 
     @State private var selectedNetworkRaw: String
+    @State private var selectedIssuerBank: String
     @State private var selectedFeePresenceRaw: String
     @State private var selectedFXFeePresenceRaw: String
     @State private var selectedRewardTypeRaw: String
 
-    init(filter: Binding<DashboardFilter>) {
+    let issuerOptions: [String]
+
+    init(filter: Binding<DashboardFilter>, issuerOptions: [String]) {
         self._filter = filter
+
+        self.issuerOptions = issuerOptions
 
         let current = filter.wrappedValue
         _selectedNetworkRaw = State(initialValue: current.network?.rawValue ?? "")
+        _selectedIssuerBank = State(initialValue: current.issuerBank ?? "")
         _selectedFeePresenceRaw = State(initialValue: current.feePresence.rawValue)
         _selectedFXFeePresenceRaw = State(initialValue: current.fxFeePresence.rawValue)
         _selectedRewardTypeRaw = State(initialValue: current.rewardType?.rawValue ?? "")
@@ -274,6 +280,15 @@ private struct DashboardFilterSheet: View {
                         Text("全部").tag("")
                         ForEach(CardNetwork.allCases) { network in
                             Text(network.title).tag(network.rawValue)
+                        }
+                    }
+                }
+
+                Section("发卡机构") {
+                    Picker("发卡机构", selection: $selectedIssuerBank) {
+                        Text("全部").tag("")
+                        ForEach(issuerOptions, id: \.self) { issuer in
+                            Text(issuer).tag(issuer)
                         }
                     }
                 }
@@ -325,6 +340,7 @@ private struct DashboardFilterSheet: View {
 
     private func resetSelections() {
         selectedNetworkRaw = ""
+        selectedIssuerBank = ""
         selectedFeePresenceRaw = FeePresenceFilter.all.rawValue
         selectedFXFeePresenceRaw = FXFeePresenceFilter.all.rawValue
         selectedRewardTypeRaw = ""
@@ -332,6 +348,7 @@ private struct DashboardFilterSheet: View {
 
     private func applySelections() {
         filter.network = selectedNetworkRaw.isEmpty ? nil : CardNetwork(rawValue: selectedNetworkRaw)
+        filter.issuerBank = selectedIssuerBank.isEmpty ? nil : selectedIssuerBank
         filter.feePresence = FeePresenceFilter(rawValue: selectedFeePresenceRaw) ?? .all
         filter.fxFeePresence = FXFeePresenceFilter(rawValue: selectedFXFeePresenceRaw) ?? .all
         filter.rewardType = selectedRewardTypeRaw.isEmpty ? nil : RewardType(rawValue: selectedRewardTypeRaw)
