@@ -50,6 +50,15 @@ struct CategoryManagementView: View {
                     newCategoryIcon = "tag.fill"
                     persist()
                 }
+                Button("添加类别") {
+                    let title = newCategoryName.trimmingCharacters(in: .whitespacesAndNewlines)
+                    guard !title.isEmpty else { return }
+                    categories.append(.init(id: "custom_\(UUID().uuidString)", title: title, systemImage: newCategoryIcon, isBuiltIn: false))
+                    newCategoryName = ""
+                    newCategoryIcon = "tag.fill"
+                    persist()
+                }
+                .onDelete(perform: deleteCustomCategory)
             }
 
             Section {
