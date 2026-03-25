@@ -197,56 +197,6 @@ struct CardDetailView: View {
         }
     }
 
-    private var feeReminderDescription: String {
-        guard card.feeReminderEnabled else { return "未开启" }
-
-        switch card.feeType {
-        case .annual:
-            if let feeRenewalDate = card.feeRenewalDate {
-                return "续费日期：\(feeRenewalDate.formatted(date: .abbreviated, time: .omitted))，提前 \(card.feeReminderLeadDays) 天提醒"
-            } else {
-                return "已开启，但未设置续费日期"
-            }
-
-        case .monthly:
-            if let feeBillingDay = card.feeBillingDay {
-                return "每月 \(feeBillingDay) 日扣费，提前 \(card.feeReminderLeadDays) 天提醒"
-            } else {
-                return "已开启，但未设置每月扣费日"
-            }
-        }
-    }
-
-    private var benefitReminderDescription: String {
-        guard card.benefitReminderEnabled else { return "未开启" }
-
-        if let benefitExpiryDate = card.benefitExpiryDate {
-            return "福利到期日：\(benefitExpiryDate.formatted(date: .abbreviated, time: .omitted))，提前 \(card.benefitReminderLeadDays) 天提醒"
-        } else {
-            return "已开启，但未设置福利过期日期"
-        }
-    }
-
-    private var paymentReminderDescription: String {
-        guard card.paymentReminderEnabled else { return "未开启" }
-
-        if let paymentDueDay = card.paymentDueDay {
-            return "每月 \(paymentDueDay) 日还款，提前 \(card.paymentReminderLeadDays) 天提醒"
-        } else {
-            return "已开启，但未设置每月还款日"
-        }
-    }
-
-    private var monthlyReviewDescription: String {
-        guard card.monthlyReviewReminderEnabled else { return "未开启" }
-
-        if let monthlyReviewDay = card.monthlyReviewDay {
-            return "每月 \(monthlyReviewDay) 日检查，提前 \(card.monthlyReviewLeadDays) 天提醒"
-        } else {
-            return "已开启，但未设置每月检查日"
-        }
-    }
-
     @ViewBuilder
     private func detailRow(_ title: String, _ value: String) -> some View {
         HStack {
@@ -273,34 +223,6 @@ struct CardDetailView: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 18))
     }
-
-    @ViewBuilder
-    private func reminderItem(title: String, enabled: Bool, detail: String) -> some View {
-        VStack(alignment: .leading, spacing: 6) {
-            HStack {
-                Text(title)
-
-                Spacer()
-
-                Text(enabled ? "已开启" : "未开启")
-                    .font(.caption.weight(.medium))
-                    .padding(.horizontal, 10)
-                    .padding(.vertical, 6)
-                    .background(
-                        enabled ? Color.green.opacity(0.16) : Color.gray.opacity(0.16),
-                        in: Capsule()
-                    )
-            }
-
-            Text(detail)
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
-        }
-        .padding(14)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 18))
-    }
-
 
     private func saveReminderSettings() {
         card.feeReminderEnabled = feeReminderEnabled
