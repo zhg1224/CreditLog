@@ -63,7 +63,7 @@ struct EditCardView: View {
     @State private var paymentReminderLeadDays: String
     @State private var paymentDueDay: String
 
-    // 提醒：每月检查 reward
+    // 提醒：每月检查 Reward
     @State private var monthlyReviewReminderEnabled: Bool
     @State private var monthlyReviewLeadDays: String
     @State private var monthlyReviewDay: String
@@ -222,7 +222,7 @@ struct EditCardView: View {
     }
 
     private var rewardMultiplierSection: some View {
-        Section("消费返利倍数") {
+        Section("消费 Reward 倍率") {
             rewardField(title: "餐饮", value: decimalBinding($rewardDining))
             rewardField(title: "超市", value: decimalBinding($rewardGroceries))
             rewardField(title: "交通", value: decimalBinding($rewardTransit))
@@ -293,7 +293,7 @@ struct EditCardView: View {
                     .keyboardType(.numberPad)
             }
 
-            Toggle("每月 reward 检查提醒", isOn: $monthlyReviewReminderEnabled)
+            Toggle("每月 Reward 检查提醒", isOn: $monthlyReviewReminderEnabled)
             if monthlyReviewReminderEnabled {
                 TextField("每月检查日", text: dayOfMonthBinding($monthlyReviewDay))
                     .keyboardType(.numberPad)

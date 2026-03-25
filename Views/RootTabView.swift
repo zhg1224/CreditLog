@@ -17,7 +17,12 @@ struct RootTabView: View {
 
             CategoriesView()
                 .tabItem {
-                    Label("类别", systemImage: "square.grid.2x2.fill")
+                    Label("页面", systemImage: "square.grid.2x2.fill")
+                }
+
+            OffersView()
+                .tabItem {
+                    Label("Offer", systemImage: "gift.fill")
                 }
         }
     }
