@@ -9,6 +9,7 @@ import Foundation
 
 struct DashboardFilter: Equatable {
     var network: CardNetwork? = nil
+    var issuerBank: String? = nil
     var feePresence: FeePresenceFilter = .all
     var fxFeePresence: FXFeePresenceFilter = .all
     var rewardType: RewardType? = nil
@@ -16,6 +17,7 @@ struct DashboardFilter: Equatable {
     var activeCount: Int {
         var count = 0
         if network != nil { count += 1 }
+        if issuerBank != nil { count += 1 }
         if feePresence != .all { count += 1 }
         if fxFeePresence != .all { count += 1 }
         if rewardType != nil { count += 1 }
@@ -27,22 +29,26 @@ struct DashboardFilter: Equatable {
             return false
         }
 
+        if let issuerBank, card.issuerBank != issuerBank {
+            return false
+        }
+
         switch feePresence {
         case .all:
             break
         case .hasFee:
-            if card.feeAmount <= 0 { return false }
+            if !card.feeEnabled || card.feeAmount <= 0 { return false }
         case .noFee:
-            if card.feeAmount > 0 { return false }
+            if card.feeEnabled && card.feeAmount > 0 { return false }
         }
 
         switch fxFeePresence {
         case .all:
             break
         case .hasFXFee:
-            if card.foreignTransactionFee <= 0 { return false }
+            if !card.foreignTransactionFeeEnabled || card.foreignTransactionFee <= 0 { return false }
         case .noFXFee:
-            if card.foreignTransactionFee > 0 { return false }
+            if card.foreignTransactionFeeEnabled && card.foreignTransactionFee > 0 { return false }
         }
 
         if let rewardType, card.rewardType != rewardType {

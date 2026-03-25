@@ -1,10 +1,3 @@
-//
-//  SettingsView.swift
-//  CreditLog
-//
-//  Created by Zhao Zhang on 2026-03-24.
-//
-
 import SwiftUI
 
 struct SettingsView: View {
@@ -14,21 +7,22 @@ struct SettingsView: View {
     var body: some View {
         NavigationStack {
             Form {
-                Section("类别管理") {
+                Section("Reward 类别") {
                     NavigationLink {
                         CategoryManagementView()
                     } label: {
-                        Label("管理返利类别", systemImage: "square.grid.2x2")
+                        Label("管理 Reward 类别", systemImage: "square.grid.2x2")
                     }
                 }
 
                 Section("外观") {
-                    Picker("显示模式", selection: $appearanceModeRaw) {
+                    Picker("", selection: $appearanceModeRaw) {
                         ForEach(AppearanceMode.allCases) { mode in
                             Text(mode.title).tag(mode.rawValue)
                         }
                     }
-                    .pickerStyle(.inline)
+                    .labelsHidden()
+                    .pickerStyle(.segmented)
                 }
 
                 Section("通知") {
@@ -59,9 +53,7 @@ struct SettingsView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button("完成") {
-                        dismiss()
-                    }
+                    Button("完成") { dismiss() }
                 }
             }
         }

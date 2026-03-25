@@ -30,13 +30,13 @@ struct EditCardView: View {
     @State private var selectedRewardType: RewardType
 
     // 回报倍率
-    @State private var rewardDining: String
-    @State private var rewardGroceries: String
-    @State private var rewardTransit: String
-    @State private var rewardGas: String
-    @State private var rewardTravel: String
-    @State private var rewardShopping: String
-    @State private var rewardBills: String
+    @State private var RewardDining: String
+    @State private var RewardGroceries: String
+    @State private var RewardTransit: String
+    @State private var RewardGas: String
+    @State private var RewardTravel: String
+    @State private var RewardShopping: String
+    @State private var RewardBills: String
 
     // 卡面
     @State private var selectedTheme: String
@@ -63,7 +63,7 @@ struct EditCardView: View {
     @State private var paymentReminderLeadDays: String
     @State private var paymentDueDay: String
 
-    // 提醒：每月检查 reward
+    // 提醒：每月检查 Reward
     @State private var monthlyReviewReminderEnabled: Bool
     @State private var monthlyReviewLeadDays: String
     @State private var monthlyReviewDay: String
@@ -124,7 +124,7 @@ struct EditCardView: View {
             Form {
                 basicInfoSection
                 feeAndRewardSection
-                rewardMultiplierSection
+                RewardMultiplierSection
                 cardFaceSection
                 benefitSection
                 reminderSection
@@ -221,15 +221,15 @@ struct EditCardView: View {
         }
     }
 
-    private var rewardMultiplierSection: some View {
-        Section("消费返利倍数") {
-            rewardField(title: "餐饮", value: decimalBinding($rewardDining))
-            rewardField(title: "超市", value: decimalBinding($rewardGroceries))
-            rewardField(title: "交通", value: decimalBinding($rewardTransit))
-            rewardField(title: "加油", value: decimalBinding($rewardGas))
-            rewardField(title: "旅行", value: decimalBinding($rewardTravel))
-            rewardField(title: "购物", value: decimalBinding($rewardShopping))
-            rewardField(title: "账单", value: decimalBinding($rewardBills))
+    private var RewardMultiplierSection: some View {
+        Section("消费 Reward 倍率") {
+            RewardField(title: "餐饮", value: decimalBinding($RewardDining))
+            RewardField(title: "超市", value: decimalBinding($RewardGroceries))
+            RewardField(title: "交通", value: decimalBinding($RewardTransit))
+            RewardField(title: "加油", value: decimalBinding($RewardGas))
+            RewardField(title: "旅行", value: decimalBinding($RewardTravel))
+            RewardField(title: "购物", value: decimalBinding($RewardShopping))
+            RewardField(title: "账单", value: decimalBinding($RewardBills))
         }
     }
 
@@ -293,7 +293,7 @@ struct EditCardView: View {
                     .keyboardType(.numberPad)
             }
 
-            Toggle("每月 reward 检查提醒", isOn: $monthlyReviewReminderEnabled)
+            Toggle("每月 Reward 检查提醒", isOn: $monthlyReviewReminderEnabled)
             if monthlyReviewReminderEnabled {
                 TextField("每月检查日", text: dayOfMonthBinding($monthlyReviewDay))
                     .keyboardType(.numberPad)
@@ -330,7 +330,7 @@ struct EditCardView: View {
         !feeAmount.isEmpty
     }
 
-    private func rewardField(title: String, value: Binding<String>) -> some View {
+    private func RewardField(title: String, value: Binding<String>) -> some View {
         HStack {
             Text(title)
             Spacer()
@@ -415,13 +415,13 @@ struct EditCardView: View {
         card.themeName = selectedTheme
         card.customCardImageData = customCardImageData
 
-        card.rewardDining = Double(rewardDining) ?? 1
-        card.rewardGroceries = Double(rewardGroceries) ?? 1
-        card.rewardTransit = Double(rewardTransit) ?? 1
-        card.rewardGas = Double(rewardGas) ?? 1
-        card.rewardTravel = Double(rewardTravel) ?? 1
-        card.rewardShopping = Double(rewardShopping) ?? 1
-        card.rewardBills = Double(rewardBills) ?? 1
+        card.rewardDining = Double(RewardDining) ?? 1
+        card.rewardGroceries = Double(RewardGroceries) ?? 1
+        card.rewardTransit = Double(RewardTransit) ?? 1
+        card.rewardGas = Double(RewardGas) ?? 1
+        card.rewardTravel = Double(RewardTravel) ?? 1
+        card.rewardShopping = Double(RewardShopping) ?? 1
+        card.rewardBills = Double(RewardBills) ?? 1
 
         card.benefitName = trimmedBenefitName
         card.benefitExpiryDate = trimmedBenefitName.isEmpty ? nil : benefitExpiryDate
