@@ -28,59 +28,25 @@ struct CategoryManagementView: View {
                         }
                     }
                 }
-                .onDelete { offsets in
-                    categories.remove(atOffsets: offsets)
-                    persist()
-                }
-                .onChange(of: categories) { _, _ in persist() }
-            }
-
-            Section("新增 Reward 类别") {
-                TextField("例如：酒店、娱乐", text: $newCategoryName)
-                Picker("图标", selection: $newCategoryIcon) {
-                    ForEach(iconLibrary, id: \.self) { icon in
-                        Label(icon, systemImage: icon).tag(icon)
-                    }
-                }
-                Button("添加类别") {
-                    let title = newCategoryName.trimmingCharacters(in: .whitespacesAndNewlines)
-                    guard !title.isEmpty else { return }
-                    categories.append(.init(id: "custom_\(UUID().uuidString)", title: title, systemImage: newCategoryIcon, isBuiltIn: false))
-                    newCategoryName = ""
-                    newCategoryIcon = "tag.fill"
-                    persist()
-                }
-                .onDelete { offsets in
-                    categories.remove(atOffsets: offsets)
-                    persist()
-                }
-                .onChange(of: categories) { _, _ in persist() }
-            }
-
-            Section("新增 Reward 类别") {
-                TextField("例如：酒店、娱乐", text: $newCategoryName)
-                Picker("图标", selection: $newCategoryIcon) {
-                    ForEach(iconLibrary, id: \.self) { icon in
-                        Label(icon, systemImage: icon).tag(icon)
-                    }
-                }
-                Button("添加类别") {
-                    let title = newCategoryName.trimmingCharacters(in: .whitespacesAndNewlines)
-                    guard !title.isEmpty else { return }
-                    categories.append(.init(id: "custom_\(UUID().uuidString)", title: title, systemImage: newCategoryIcon, isBuiltIn: false))
-                    newCategoryName = ""
-                    newCategoryIcon = "tag.fill"
-                    persist()
-                }
-                Button("添加类别") {
-                    let title = newCategoryName.trimmingCharacters(in: .whitespacesAndNewlines)
-                    guard !title.isEmpty else { return }
-                    categories.append(.init(id: "custom_\(UUID().uuidString)", title: title, systemImage: newCategoryIcon, isBuiltIn: false))
-                    newCategoryName = ""
-                    newCategoryIcon = "tag.fill"
-                    persist()
-                }
                 .onDelete(perform: deleteCustomCategory)
+                .onChange(of: categories) { _, _ in persist() }
+            }
+
+            Section("新增 Reward 类别") {
+                TextField("例如：酒店、娱乐", text: $newCategoryName)
+                Picker("图标", selection: $newCategoryIcon) {
+                    ForEach(iconLibrary, id: \.self) { icon in
+                        Label(icon, systemImage: icon).tag(icon)
+                    }
+                }
+                Button("添加类别") {
+                    let title = newCategoryName.trimmingCharacters(in: .whitespacesAndNewlines)
+                    guard !title.isEmpty else { return }
+                    categories.append(.init(id: "custom_\(UUID().uuidString)", title: title, systemImage: newCategoryIcon, isBuiltIn: false))
+                    newCategoryName = ""
+                    newCategoryIcon = "tag.fill"
+                    persist()
+                }
             }
 
             Section {
@@ -98,5 +64,11 @@ struct CategoryManagementView: View {
     private func persist() {
         let valid = categories.filter { !$0.title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }
         RewardCategoryStore.save(all: valid)
+    }
+
+    private func deleteCustomCategory(at offsets: IndexSet) {
+        let removableOffsets = IndexSet(offsets.filter { !categories[$0].isBuiltIn })
+        categories.remove(atOffsets: removableOffsets)
+        persist()
     }
 }
