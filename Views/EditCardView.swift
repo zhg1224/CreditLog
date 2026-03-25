@@ -86,15 +86,15 @@ struct EditCardView: View {
         _selectedFeeType = State(initialValue: card.feeType)
         _feeAmount = State(initialValue: card.feeAmount == 0 ? "" : String(card.feeAmount))
         _foreignTransactionFee = State(initialValue: card.foreignTransactionFee == 0 ? "" : String(card.foreignTransactionFee))
-        _selectedRewardType = State(initialValue: card.rewardType)
+        _selectedRewardType = State(initialValue: card.RewardType)
 
-        _rewardDining = State(initialValue: String(card.rewardDining))
-        _rewardGroceries = State(initialValue: String(card.rewardGroceries))
-        _rewardTransit = State(initialValue: String(card.rewardTransit))
-        _rewardGas = State(initialValue: String(card.rewardGas))
-        _rewardTravel = State(initialValue: String(card.rewardTravel))
-        _rewardShopping = State(initialValue: String(card.rewardShopping))
-        _rewardBills = State(initialValue: String(card.rewardBills))
+        _RewardDining = State(initialValue: String(card.RewardDining))
+        _RewardGroceries = State(initialValue: String(card.RewardGroceries))
+        _RewardTransit = State(initialValue: String(card.RewardTransit))
+        _RewardGas = State(initialValue: String(card.RewardGas))
+        _RewardTravel = State(initialValue: String(card.RewardTravel))
+        _RewardShopping = State(initialValue: String(card.RewardShopping))
+        _RewardBills = State(initialValue: String(card.RewardBills))
 
         _selectedTheme = State(initialValue: card.themeName)
         _customCardImageData = State(initialValue: card.customCardImageData)
@@ -213,8 +213,8 @@ struct EditCardView: View {
             }
 
             Picker("Reward 类型", selection: $selectedRewardType) {
-                ForEach(RewardType.allCases) { rewardType in
-                    Text(rewardType.title).tag(rewardType)
+                ForEach(RewardType.allCases) { RewardType in
+                    Text(RewardType.title).tag(RewardType)
                 }
             }
             .pickerStyle(.segmented)
@@ -410,7 +410,7 @@ struct EditCardView: View {
         card.feeType = selectedFeeType
         card.feeAmount = Double(feeAmount) ?? 0
         card.foreignTransactionFee = Double(foreignTransactionFee) ?? 0
-        card.rewardType = selectedRewardType
+        card.RewardType = selectedRewardType
 
         card.themeName = selectedTheme
         card.customCardImageData = customCardImageData
