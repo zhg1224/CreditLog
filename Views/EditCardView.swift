@@ -86,15 +86,15 @@ struct EditCardView: View {
         _selectedFeeType = State(initialValue: card.feeType)
         _feeAmount = State(initialValue: card.feeAmount == 0 ? "" : String(card.feeAmount))
         _foreignTransactionFee = State(initialValue: card.foreignTransactionFee == 0 ? "" : String(card.foreignTransactionFee))
-        _selectedRewardType = State(initialValue: card.RewardType)
+        _selectedRewardType = State(initialValue: card.rewardType)
 
-        _RewardDining = State(initialValue: String(card.RewardDining))
-        _RewardGroceries = State(initialValue: String(card.RewardGroceries))
-        _RewardTransit = State(initialValue: String(card.RewardTransit))
-        _RewardGas = State(initialValue: String(card.RewardGas))
-        _RewardTravel = State(initialValue: String(card.RewardTravel))
-        _RewardShopping = State(initialValue: String(card.RewardShopping))
-        _RewardBills = State(initialValue: String(card.RewardBills))
+        _RewardDining = State(initialValue: String(card.rewardDining))
+        _RewardGroceries = State(initialValue: String(card.rewardGroceries))
+        _RewardTransit = State(initialValue: String(card.rewardTransit))
+        _RewardGas = State(initialValue: String(card.rewardGas))
+        _RewardTravel = State(initialValue: String(card.rewardTravel))
+        _RewardShopping = State(initialValue: String(card.rewardShopping))
+        _RewardBills = State(initialValue: String(card.rewardBills))
 
         _selectedTheme = State(initialValue: card.themeName)
         _customCardImageData = State(initialValue: card.customCardImageData)
@@ -410,7 +410,7 @@ struct EditCardView: View {
         card.feeType = selectedFeeType
         card.feeAmount = Double(feeAmount) ?? 0
         card.foreignTransactionFee = Double(foreignTransactionFee) ?? 0
-        card.RewardType = selectedRewardType
+        card.rewardType = selectedRewardType
 
         card.themeName = selectedTheme
         card.customCardImageData = customCardImageData
