@@ -308,21 +308,3 @@ struct CardOffer: Identifiable, Codable, Hashable {
     var benefitValue: Double
     var note: String
 }
-
-enum OfferBenefitKind: String, CaseIterable, Identifiable, Codable {
-    case credits
-    case points
-
-    var id: String { rawValue }
-    var title: String { self == .credits ? "Credits" : "Points" }
-}
-
-struct CardOffer: Identifiable, Codable, Hashable {
-    var id: UUID = UUID()
-    var name: String
-    var reminderEnabled: Bool
-    var reminderDate: Date
-    var benefitKind: OfferBenefitKind
-    var benefitValue: Double
-    var note: String
-}
