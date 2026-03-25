@@ -16,6 +16,19 @@ struct CardDetailView: View {
 
     @State private var showEditSheet = false
     @State private var showDeleteDialog = false
+    @State private var feeReminderEnabled: Bool
+    @State private var feeReminderDate: Date
+    @State private var paymentReminderEnabled: Bool
+    @State private var paymentReminderDate: Date
+
+
+    init(card: CreditCard) {
+        self.card = card
+        _feeReminderEnabled = State(initialValue: card.feeReminderEnabled)
+        _feeReminderDate = State(initialValue: card.feeRenewalDate ?? .now)
+        _paymentReminderEnabled = State(initialValue: card.paymentReminderEnabled)
+        _paymentReminderDate = State(initialValue: Calendar.current.date(from: DateComponents(year: Calendar.current.component(.year, from: .now), month: Calendar.current.component(.month, from: .now), day: card.paymentDueDay ?? 1)) ?? .now)
+    }
 
     private let columns = [
         GridItem(.flexible()),
@@ -85,29 +98,20 @@ struct CardDetailView: View {
                         Text("提醒设置")
                             .font(.headline)
 
-                        reminderItem(
-                            title: card.feeType == .annual ? "年费提醒" : "月费提醒",
-                            enabled: card.feeReminderEnabled,
-                            detail: feeReminderDescription
-                        )
+                        Toggle("年/月费提醒", isOn: $feeReminderEnabled)
+                        if feeReminderEnabled {
+                            DatePicker("提醒日期", selection: $feeReminderDate, displayedComponents: .date)
+                        }
 
-                        reminderItem(
-                            title: "福利过期提醒",
-                            enabled: card.benefitReminderEnabled,
-                            detail: benefitReminderDescription
-                        )
+                        Toggle("还款日提醒", isOn: $paymentReminderEnabled)
+                        if paymentReminderEnabled {
+                            DatePicker("提醒日期", selection: $paymentReminderDate, displayedComponents: .date)
+                        }
 
-                        reminderItem(
-                            title: "还款日提醒",
-                            enabled: card.paymentReminderEnabled,
-                            detail: paymentReminderDescription
-                        )
-
-                        reminderItem(
-                            title: "每月 reward 检查提醒",
-                            enabled: card.monthlyReviewReminderEnabled,
-                            detail: monthlyReviewDescription
-                        )
+                        Button("保存提醒设置") {
+                            saveReminderSettings()
+                        }
+                        .buttonStyle(.borderedProminent)
                     }
                 }
             }
@@ -157,15 +161,15 @@ struct CardDetailView: View {
                 Text("最强类别")
                     .font(.headline)
 
-                Text("根据当前卡片的 reward 类型，以下是这张卡回报最强的 3 个消费类别。")
+                Text("根据当前卡片的 Reward 类型，以下是这张卡回报最强的 3 个消费类别。")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
 
-                ForEach(topCategories, id: \.self) { category in
+                ForEach(topRewardRows, id: \.id) { row in
                     HStack {
-                        Label(category.title, systemImage: category.systemImage)
+                        Label(row.title, systemImage: row.systemImage)
                         Spacer()
-                        Text(formattedRewardValue(card.reward(for: category)))
+                        Text(formattedRewardValue(row.value))
                             .font(.headline)
                     }
                     .padding(.vertical, 6)
@@ -174,13 +178,14 @@ struct CardDetailView: View {
         }
     }
 
-    private var topCategories: [RewardCategory] {
-        Array(
-            RewardCategory.allCases.sorted {
-                card.reward(for: $0) > card.reward(for: $1)
-            }
-            .prefix(3)
-        )
+    private var topRewardRows: [RewardRow] {
+        var rows = RewardCategory.allCases.map {
+            RewardRow(id: $0.rawValue, title: $0.title, systemImage: $0.systemImage, value: card.reward(for: $0))
+        }
+        rows += RewardCategoryStore.all().filter { !$0.isBuiltIn }.map {
+            RewardRow(id: $0.id, title: $0.title, systemImage: $0.systemImage, value: card.rewardValue(for: $0.id))
+        }
+        return Array(rows.sorted { $0.value > $1.value }.prefix(3))
     }
 
     private func formattedRewardValue(_ value: Double) -> String {
@@ -296,6 +301,25 @@ struct CardDetailView: View {
         .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 18))
     }
 
+
+    private func saveReminderSettings() {
+        card.feeReminderEnabled = feeReminderEnabled
+        card.feeRenewalDate = feeReminderEnabled ? feeReminderDate : nil
+        card.paymentReminderEnabled = paymentReminderEnabled
+        card.paymentDueDay = paymentReminderEnabled ? Calendar.current.component(.day, from: paymentReminderDate) : nil
+
+        try? modelContext.save()
+
+        Task {
+            if feeReminderEnabled || paymentReminderEnabled {
+                let granted = await NotificationManager.shared.requestAuthorization()
+                if granted { await NotificationManager.shared.refreshNotifications(for: card) }
+            } else {
+                NotificationManager.shared.removeNotifications(for: card.id)
+            }
+        }
+    }
+
     private func deleteCard() {
         NotificationManager.shared.removeNotifications(for: card.id)
         modelContext.delete(card)
@@ -308,4 +332,12 @@ struct CardDetailView: View {
 
         dismiss()
     }
+}
+
+
+private struct RewardRow: Identifiable {
+    let id: String
+    let title: String
+    let systemImage: String
+    let value: Double
 }

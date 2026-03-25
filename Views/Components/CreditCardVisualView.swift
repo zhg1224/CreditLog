@@ -25,55 +25,58 @@ struct CreditCardVisualView: View {
                 )
                 .shadow(color: .black.opacity(0.12), radius: 18, x: 0, y: 10)
 
-            VStack(alignment: .leading, spacing: 14) {
-                HStack {
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text(card.issuerBank)
-                            .font(.subheadline)
-                            .foregroundStyle(.white.opacity(0.88))
+            if card.themeName != "custom" {
+                VStack(alignment: .leading, spacing: 14) {
+                    HStack {
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text(card.issuerBank)
+                                .font(.subheadline)
+                                .foregroundStyle(.white.opacity(0.88))
 
-                        Text(card.network.title)
-                            .font(.caption.weight(.medium))
-                            .padding(.horizontal, 10)
-                            .padding(.vertical, 5)
-                            .background(.white.opacity(0.15), in: Capsule())
-                            .foregroundStyle(.white)
+                            Text(card.network.title)
+                                .font(.caption.weight(.medium))
+                                .padding(.horizontal, 10)
+                                .padding(.vertical, 5)
+                                .background(.white.opacity(0.15), in: Capsule())
+                                .foregroundStyle(.white)
+                        }
+
+                        Spacer()
+
+                        Image(systemName: "wave.3.right")
+                            .foregroundStyle(.white.opacity(0.85))
                     }
 
                     Spacer()
 
-                    Image(systemName: "wave.3.right")
-                        .foregroundStyle(.white.opacity(0.85))
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text(card.name)
+                            .font(.title3.weight(.semibold))
+                            .foregroundStyle(.white)
+
+                        Text(card.rewardType.title)
+                            .font(.footnote)
+                            .foregroundStyle(.white.opacity(0.82))
+                    }
+
+                    HStack {
+                        Text(card.maskedNumber)
+                            .font(.headline.monospacedDigit())
+                            .foregroundStyle(.white.opacity(0.96))
+
+                        Spacer()
+
+                        Text(card.feeText)
+                            .font(.footnote.weight(.medium))
+                            .padding(.horizontal, 10)
+                            .padding(.vertical, 6)
+                            .background(.white.opacity(0.15), in: Capsule())
+                            .foregroundStyle(.white)
+                    }
                 }
-
-                Spacer()
-
-                VStack(alignment: .leading, spacing: 6) {
-                    Text(card.name)
-                        .font(.title3.weight(.semibold))
-                        .foregroundStyle(.white)
-
-                    Text(card.rewardType.title)
-                        .font(.footnote)
-                        .foregroundStyle(.white.opacity(0.82))
-                }
-
-                HStack {
-                    Text(card.maskedNumber)
-                        .font(.headline.monospacedDigit())
-                        .foregroundStyle(.white.opacity(0.96))
-
-                    Spacer()
-
-                    Text(card.feeText)
-                        .font(.footnote.weight(.medium))
-                        .padding(.horizontal, 10)
-                        .padding(.vertical, 6)
-                        .background(.white.opacity(0.15), in: Capsule())
-                        .foregroundStyle(.white)
-                }
+                .padding(20)
             }
-            .padding(20)
+
         }
         .frame(height: 188)
     }

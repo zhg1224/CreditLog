@@ -1,10 +1,3 @@
-//
-//  CategoriesView.swift
-//  CreditLog
-//
-//  Created by Zhao Zhang on 2026-03-23.
-//
-
 import SwiftUI
 import SwiftData
 
@@ -15,165 +8,144 @@ struct CategoriesView: View {
     private let viewModel = CategoryRecommendationViewModel()
 
     @State private var selectedNetworkFilter: CardNetwork?
-    @State private var sortOption: CategoryRecommendationSortOption = .defaultOrder
+    @State private var selectedRewardFilter: RewardTypeFilter = .all
+    @State private var sortOption: CategoryRecommendationSortOption = .rewardHighToLow
 
     var body: some View {
         NavigationStack {
             ZStack {
-                Color(.systemGroupedBackground)
-                    .ignoresSafeArea()
-
-                if cards.isEmpty {
-                    EmptyStateView(
-                        title: "暂无可分析的信用卡",
-                        subtitle: "先去 Dashboard 添加信用卡，系统才能计算最佳回报。",
-                        systemImage: "square.grid.2x2"
-                    )
-                    .padding(.horizontal, 24)
-                } else if filteredCards.isEmpty {
-                    EmptyStateView(
-                        title: "筛选后没有可分析的信用卡",
-                        subtitle: "请尝试切换卡组织筛选条件。",
-                        systemImage: "line.3.horizontal.decrease.circle"
-                    )
-                    .padding(.horizontal, 24)
+                Color(.systemGroupedBackground).ignoresSafeArea()
+                if filteredCards.isEmpty {
+                    EmptyStateView(title: "暂无可分析的信用卡", subtitle: "先去 Dashboard 添加信用卡，系统才能计算最佳回报。", systemImage: "square.grid.2x2")
+                        .padding(.horizontal, 24)
                 } else {
                     ScrollView {
                         VStack(spacing: 16) {
-                            GlassCard {
-                                VStack(alignment: .leading, spacing: 8) {
-                                    Text("最佳用卡建议")
-                                        .font(.headline)
-
-                                    Text(headerDescription)
-                                        .font(.subheadline)
-                                        .foregroundStyle(.secondary)
-                                }
+                            if selectedRewardFilter != .pointsOnly {
+                                rewardBlock(title: "Cash Back", cards: filteredCards.filter { $0.rewardType == .cashBack })
                             }
-
-                            ForEach(sortedEntries) { entry in
-                                CategoryRecommendationRow(
-                                    category: entry.category,
-                                    bestCard: entry.bestCard,
-                                    rewardText: rewardText(for: entry.bestCard, value: entry.rewardValue),
-                                    detailText: detailText(for: entry.bestCard)
-                                )
+                            if selectedRewardFilter != .cashOnly {
+                                rewardBlock(title: "Points Reward", cards: filteredCards.filter { $0.rewardType == .pointsReward })
                             }
                         }
                         .padding(.horizontal, 16)
-                        .padding(.top, 8)
-                        .padding(.bottom, 28)
+                        .padding(.vertical, 10)
                     }
                 }
             }
-            .navigationTitle("消费类别")
-            .navigationBarTitleDisplayMode(.large)
+            .navigationTitle("页面")
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Menu {
+                        Section("Reward 类型") {
+                            ForEach(RewardTypeFilter.allCases) { option in
+                                Button { selectedRewardFilter = option } label: {
+                                    if selectedRewardFilter == option { Label(option.title, systemImage: "checkmark") } else { Text(option.title) }
+                                }
+                            }
+                        }
                         Section("排序方式") {
                             ForEach(CategoryRecommendationSortOption.allCases) { option in
-                                Button {
-                                    sortOption = option
-                                } label: {
-                                    if sortOption == option {
-                                        Label(option.title, systemImage: "checkmark")
-                                    } else {
-                                        Text(option.title)
-                                    }
+                                Button { sortOption = option } label: {
+                                    if sortOption == option { Label(option.title, systemImage: "checkmark") } else { Text(option.title) }
                                 }
                             }
                         }
-
                         Section("卡组织筛选") {
-                            Button {
-                                selectedNetworkFilter = nil
-                            } label: {
-                                if selectedNetworkFilter == nil {
-                                    Label("全部", systemImage: "checkmark")
-                                } else {
-                                    Text("全部")
-                                }
+                            Button { selectedNetworkFilter = nil } label: {
+                                if selectedNetworkFilter == nil { Label("全部", systemImage: "checkmark") } else { Text("全部") }
                             }
-
                             ForEach(CardNetwork.allCases) { network in
-                                Button {
-                                    selectedNetworkFilter = network
-                                } label: {
-                                    if selectedNetworkFilter == network {
-                                        Label(network.title, systemImage: "checkmark")
-                                    } else {
-                                        Text(network.title)
-                                    }
+                                Button { selectedNetworkFilter = network } label: {
+                                    if selectedNetworkFilter == network { Label(network.title, systemImage: "checkmark") } else { Text(network.title) }
                                 }
                             }
                         }
-                    } label: {
-                        Image(systemName: "ellipsis.circle")
-                    }
+                    } label: { Image(systemName: "ellipsis.circle") }
                 }
             }
         }
     }
 
+
     private var filteredCards: [CreditCard] {
-        let activeCards = cards.filter { !$0.isArchived }
-
-        guard let selectedNetworkFilter else {
-            return activeCards
-        }
-
-        return activeCards.filter { $0.network == selectedNetworkFilter }
+        let active = cards.filter { !$0.isArchived }
+        if let network = selectedNetworkFilter { return active.filter { $0.network == network } }
+        return active
     }
 
-    private var headerDescription: String {
-        if let selectedNetworkFilter {
-            return "当前仅比较 \(selectedNetworkFilter.title) 卡组织下的信用卡，系统会自动给出每个消费类别的推荐卡。"
-        } else {
-            return "系统会根据你录入的 reward 倍率，自动给出每个消费类别的推荐卡。"
+    private func rewardBlock(title: String, cards: [CreditCard]) -> some View {
+        GlassCard {
+            VStack(alignment: .leading, spacing: 10) {
+                Text(title).font(.headline)
+                ForEach(sortedEntries(from: cards)) { entry in
+                    CategoryRecommendationRow(
+                        category: RewardCategory(rawValue: entry.categoryID) ?? .dining,
+                        bestCard: entry.bestCard,
+                        rewardText: entry.bestCard == nil ? "0" : formatted(entry.rewardValue, type: entry.bestCard?.rewardType ?? .cashBack),
+                        detailText: entry.bestCard.map { "\($0.issuerBank) · \($0.network.title)" } ?? ""
+                    )
+                }
+                ForEach(sortedCustomEntries(from: cards), id: \.categoryID) { entry in
+                    HStack {
+                        Text(entry.title)
+                        Spacer()
+                        Text(formatted(entry.rewardValue, type: entry.bestCard?.rewardType ?? .cashBack))
+                    }
+                    .padding()
+                    .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 12))
+                }
+            }
         }
     }
 
-    private var sortedEntries: [CategoryEntry] {
+    private func sortedEntries(from sourceCards: [CreditCard]) -> [CategoryEntry] {
         var entries = RewardCategory.allCases.map { category in
-            let bestCard = viewModel.bestCard(for: category, from: filteredCards)
-            let rewardValue = viewModel.bestReward(for: category, from: filteredCards)
-            return CategoryEntry(category: category, bestCard: bestCard, rewardValue: rewardValue)
+            CategoryEntry(categoryID: category.rawValue, title: category.title, bestCard: viewModel.bestCard(for: category, from: sourceCards), rewardValue: viewModel.bestReward(for: category, from: sourceCards))
         }
-
         switch sortOption {
-        case .defaultOrder:
-            return entries
-        case .rewardHighToLow:
-            entries.sort { $0.rewardValue > $1.rewardValue }
-            return entries
-        case .rewardLowToHigh:
-            entries.sort { $0.rewardValue < $1.rewardValue }
-            return entries
+        case .defaultOrder: break
+        case .rewardHighToLow: entries.sort { $0.rewardValue > $1.rewardValue }
+        case .rewardLowToHigh: entries.sort { $0.rewardValue < $1.rewardValue }
         }
+        return entries
     }
 
-    private func rewardText(for card: CreditCard?, value: Double) -> String {
-        guard let card else { return "0" }
-
-        switch card.rewardType {
-        case .cashBack:
-            return String(format: "%.1f%%", value)
-        case .pointsReward:
-            return String(format: "%.1fX", value)
+    private func sortedCustomEntries(from sourceCards: [CreditCard]) -> [CategoryEntry] {
+        let custom = RewardCategoryStore.all().filter { !$0.isBuiltIn }
+        var entries = custom.map { item in
+            let best = sourceCards.max { $0.rewardValue(for: item.id) < $1.rewardValue(for: item.id) }
+            return CategoryEntry(categoryID: item.id, title: item.title, bestCard: best, rewardValue: best?.rewardValue(for: item.id) ?? 0)
         }
+        switch sortOption {
+        case .defaultOrder: break
+        case .rewardHighToLow: entries.sort { $0.rewardValue > $1.rewardValue }
+        case .rewardLowToHigh: entries.sort { $0.rewardValue < $1.rewardValue }
+        }
+        return entries
     }
 
-    private func detailText(for card: CreditCard?) -> String {
-        guard let card else { return "" }
-        return "\(card.issuerBank) · \(card.network.title)"
+    private func formatted(_ value: Double, type: RewardType) -> String {
+        type == .pointsReward ? String(format: "%.1fX", value) : String(format: "%.1f%%", value)
     }
 }
 
 private struct CategoryEntry: Identifiable {
-    let category: RewardCategory
+    let categoryID: String
+    let title: String
     let bestCard: CreditCard?
     let rewardValue: Double
+    var id: String { categoryID }
+}
 
-    var id: String { category.id }
+enum RewardTypeFilter: String, CaseIterable, Identifiable {
+    case all, cashOnly, pointsOnly
+    var id: String { rawValue }
+    var title: String {
+        switch self {
+        case .all: return "全部"
+        case .cashOnly: return "仅 Cash Back"
+        case .pointsOnly: return "仅 Points Reward"
+        }
+    }
 }

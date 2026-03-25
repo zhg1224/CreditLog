@@ -1,36 +1,71 @@
-//
-//  CategoryManagementView.swift
-//  CreditLog
-//
-//  Created by Zhao Zhang on 2026-03-24.
-//
-
 import SwiftUI
 
 struct CategoryManagementView: View {
+    @State private var categories: [RewardCategoryItem] = RewardCategoryStore.all()
+    @State private var newCategoryName = ""
+    @State private var newCategoryIcon = "tag.fill"
+
+    private let iconLibrary = ["fork.knife", "cart.fill", "tram.fill", "fuelpump.fill", "airplane", "bag.fill", "doc.text.fill", "tag.fill", "gift.fill", "sparkles", "star.fill", "gamecontroller.fill", "tv.fill", "bed.double.fill"]
+
     var body: some View {
         List {
-            Section("当前内置类别") {
-                ForEach(RewardCategory.allCases) { category in
-                    HStack(spacing: 12) {
+            Section("Reward 类别") {
+                ForEach($categories) { $category in
+                    HStack {
                         Image(systemName: category.systemImage)
-                            .frame(width: 28)
-
-                        Text(category.title)
-
+                            .frame(width: 24)
+                        TextField("类别名", text: $category.title)
                         Spacer()
+                        Menu {
+                            ForEach(iconLibrary, id: \.self) { icon in
+                                Button {
+                                    category.systemImage = icon
+                                    persist()
+                                } label: { Label(icon, systemImage: icon) }
+                            }
+                        } label: {
+                            Image(systemName: "paintpalette")
+                        }
                     }
-                    .padding(.vertical, 4)
+                }
+                .onDelete { offsets in
+                    categories.remove(atOffsets: offsets)
+                    persist()
+                }
+                .onChange(of: categories) { _, _ in persist() }
+            }
+
+            Section("新增 Reward 类别") {
+                TextField("例如：酒店、娱乐", text: $newCategoryName)
+                Picker("图标", selection: $newCategoryIcon) {
+                    ForEach(iconLibrary, id: \.self) { icon in
+                        Label(icon, systemImage: icon).tag(icon)
+                    }
+                }
+                Button("添加类别") {
+                    let title = newCategoryName.trimmingCharacters(in: .whitespacesAndNewlines)
+                    guard !title.isEmpty else { return }
+                    categories.append(.init(id: "custom_\(UUID().uuidString)", title: title, systemImage: newCategoryIcon, isBuiltIn: false))
+                    newCategoryName = ""
+                    newCategoryIcon = "tag.fill"
+                    persist()
                 }
             }
 
             Section {
-                Text("第 3 组会把这里升级成真正可新增 / 删除的类别管理，并同步影响添加卡片、返利推荐和详情页分析。")
-                    .font(.footnote)
-                    .foregroundStyle(.secondary)
+                Button("重置默认类别") {
+                    RewardCategoryStore.resetToDefault()
+                    categories = RewardCategoryStore.all()
+                }
+                .foregroundStyle(.red)
             }
         }
-        .navigationTitle("类别管理")
+        .navigationTitle("Reward 类别")
         .navigationBarTitleDisplayMode(.inline)
+    }
+
+    private func persist() {
+        let valid = categories.filter { !$0.title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }
+        RewardCategoryStore.save(all: valid)
     }
 }

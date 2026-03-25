@@ -1,13 +1,9 @@
-//
-//  NotificationManagementView.swift
-//  CreditLog
-//
-//  Created by Zhao Zhang on 2026-03-24.
-//
-
 import SwiftUI
+import SwiftData
 
 struct NotificationManagementView: View {
+    @Environment(\.modelContext) private var modelContext
+    @Query(sort: [SortDescriptor(\CreditCard.createdAt, order: .reverse)]) private var cards: [CreditCard]
     @State private var authorizationStatusText = "尚未检查"
 
     var body: some View {
@@ -16,34 +12,53 @@ struct NotificationManagementView: View {
                 HStack {
                     Text("当前状态")
                     Spacer()
-                    Text(authorizationStatusText)
-                        .foregroundStyle(.secondary)
+                    Text(authorizationStatusText).foregroundStyle(.secondary)
                 }
 
                 Button("请求通知权限") {
                     Task {
                         let granted = await NotificationManager.shared.requestAuthorization()
-                        await MainActor.run {
-                            authorizationStatusText = granted ? "已授权" : "未授权"
-                        }
+                        await MainActor.run { authorizationStatusText = granted ? "已授权" : "未授权" }
                     }
                 }
             }
 
             Section("当前已支持的提醒") {
-                Label("费用提醒（年费 / 月费）", systemImage: "creditcard")
-                Label("福利过期提醒", systemImage: "gift")
+                Label("年/月费提醒", systemImage: "creditcard")
                 Label("还款日提醒", systemImage: "calendar")
-                Label("每月 reward 检查提醒", systemImage: "arrow.clockwise")
             }
 
-            Section {
-                Text("第 4 组会把这里升级为真正的统一通知管理页面，包括每张卡的提醒开关、提前天数、Welcome Bonus 与 Offer 提醒。")
-                    .font(.footnote)
-                    .foregroundStyle(.secondary)
+            Section("按卡片管理") {
+                ForEach(cards) { card in
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text(card.name).font(.headline)
+
+                        Toggle("年/月费提醒", isOn: Binding(
+                            get: { card.feeReminderEnabled },
+                            set: { card.feeReminderEnabled = $0; persist(card) }
+                        ))
+
+                        Toggle("还款日提醒", isOn: Binding(
+                            get: { card.paymentReminderEnabled },
+                            set: { card.paymentReminderEnabled = $0; persist(card) }
+                        ))
+                    }
+                }
             }
         }
         .navigationTitle("通知管理")
         .navigationBarTitleDisplayMode(.inline)
+    }
+
+    private func persist(_ card: CreditCard) {
+        try? modelContext.save()
+        Task {
+            if card.feeReminderEnabled || card.paymentReminderEnabled {
+                let granted = await NotificationManager.shared.requestAuthorization()
+                if granted { await NotificationManager.shared.refreshNotifications(for: card) }
+            } else {
+                NotificationManager.shared.removeNotifications(for: card.id)
+            }
+        }
     }
 }
