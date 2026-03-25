@@ -63,7 +63,7 @@ struct EditCardView: View {
     @State private var paymentReminderLeadDays: String
     @State private var paymentDueDay: String
 
-    // 提醒：每月检查 reward
+    // 提醒：每月检查 Reward
     @State private var monthlyReviewReminderEnabled: Bool
     @State private var monthlyReviewLeadDays: String
     @State private var monthlyReviewDay: String
@@ -293,7 +293,7 @@ struct EditCardView: View {
                     .keyboardType(.numberPad)
             }
 
-            Toggle("每月 reward 检查提醒", isOn: $monthlyReviewReminderEnabled)
+            Toggle("每月 Reward 检查提醒", isOn: $monthlyReviewReminderEnabled)
             if monthlyReviewReminderEnabled {
                 TextField("每月检查日", text: dayOfMonthBinding($monthlyReviewDay))
                     .keyboardType(.numberPad)
