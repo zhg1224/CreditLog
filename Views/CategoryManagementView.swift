@@ -50,6 +50,7 @@ struct CategoryManagementView: View {
                     newCategoryIcon = "tag.fill"
                     persist()
                 }
+                .onDelete(perform: deleteCustomCategory)
             }
 
             Section {
