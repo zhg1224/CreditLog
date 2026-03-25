@@ -7,7 +7,7 @@ struct CategoriesView: View {
 
     private let viewModel = CategoryRecommendationViewModel()
 
-    @State private var selectedIssuerFilter: String?
+    @State private var selectedNetworkFilter: CardNetwork?
     @State private var selectedRewardFilter: RewardTypeFilter = .all
     @State private var sortOption: CategoryRecommendationSortOption = .rewardHighToLow
 
@@ -33,7 +33,7 @@ struct CategoriesView: View {
                     }
                 }
             }
-            .navigationTitle("消费类别")
+            .navigationTitle("页面")
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Menu {
@@ -51,13 +51,13 @@ struct CategoriesView: View {
                                 }
                             }
                         }
-                        Section("发卡机构筛选") {
-                            Button { selectedIssuerFilter = nil } label: {
-                                if selectedIssuerFilter == nil { Label("全部", systemImage: "checkmark") } else { Text("全部") }
+                        Section("卡组织筛选") {
+                            Button { selectedNetworkFilter = nil } label: {
+                                if selectedNetworkFilter == nil { Label("全部", systemImage: "checkmark") } else { Text("全部") }
                             }
-                            ForEach(issuerOptions, id: \.self) { issuer in
-                                Button { selectedIssuerFilter = issuer } label: {
-                                    if selectedIssuerFilter == issuer { Label(issuer, systemImage: "checkmark") } else { Text(issuer) }
+                            ForEach(CardNetwork.allCases) { network in
+                                Button { selectedNetworkFilter = network } label: {
+                                    if selectedNetworkFilter == network { Label(network.title, systemImage: "checkmark") } else { Text(network.title) }
                                 }
                             }
                         }
@@ -67,13 +67,10 @@ struct CategoriesView: View {
         }
     }
 
-    private var issuerOptions: [String] {
-        Array(Set(cards.map { $0.issuerBank })).sorted()
-    }
 
     private var filteredCards: [CreditCard] {
         let active = cards.filter { !$0.isArchived }
-        if let issuer = selectedIssuerFilter { return active.filter { $0.issuerBank == issuer } }
+        if let network = selectedNetworkFilter { return active.filter { $0.network == network } }
         return active
     }
 
@@ -115,7 +112,7 @@ struct CategoriesView: View {
     }
 
     private func sortedCustomEntries(from sourceCards: [CreditCard]) -> [CategoryEntry] {
-        let custom = RewardCategoryStore.custom()
+        let custom = RewardCategoryStore.all().filter { !$0.isBuiltIn }
         var entries = custom.map { item in
             let best = sourceCards.max { $0.rewardValue(for: item.id) < $1.rewardValue(for: item.id) }
             return CategoryEntry(categoryID: item.id, title: item.title, bestCard: best, rewardValue: best?.rewardValue(for: item.id) ?? 0)

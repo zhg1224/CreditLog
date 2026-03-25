@@ -1,63 +1,72 @@
-//
-//  CategoryManagementView.swift
-//  CreditLog
-//
-
 import SwiftUI
 
 struct CategoryManagementView: View {
-    @State private var customCategories: [RewardCategoryItem] = RewardCategoryStore.custom()
+    @State private var categories: [RewardCategoryItem] = RewardCategoryStore.all()
     @State private var newCategoryName = ""
+    @State private var newCategoryIcon = "tag.fill"
+
+    private let iconLibrary = ["fork.knife", "cart.fill", "tram.fill", "fuelpump.fill", "airplane", "bag.fill", "doc.text.fill", "tag.fill", "gift.fill", "sparkles", "star.fill", "gamecontroller.fill", "tv.fill", "bed.double.fill"]
 
     var body: some View {
         List {
-            Section("当前类别") {
-                ForEach(RewardCategoryItem.builtIns) { category in
-                    categoryRow(category)
+            Section("Reward 类别") {
+                ForEach($categories) { $category in
+                    HStack {
+                        Image(systemName: category.systemImage)
+                            .frame(width: 24)
+                        TextField("类别名", text: $category.title)
+                        Spacer()
+                        Menu {
+                            ForEach(iconLibrary, id: \.self) { icon in
+                                Button {
+                                    category.systemImage = icon
+                                    persist()
+                                } label: { Label(icon, systemImage: icon) }
+                            }
+                        } label: {
+                            Image(systemName: "paintpalette")
+                        }
+                    }
                 }
+                .onDelete { offsets in
+                    categories.remove(atOffsets: offsets)
+                    persist()
+                }
+                .onChange(of: categories) { _, _ in persist() }
+            }
 
-                ForEach(customCategories) { category in
-                    categoryRow(category)
+            Section("新增 Reward 类别") {
+                TextField("例如：酒店、娱乐", text: $newCategoryName)
+                Picker("图标", selection: $newCategoryIcon) {
+                    ForEach(iconLibrary, id: \.self) { icon in
+                        Label(icon, systemImage: icon).tag(icon)
+                    }
+                }
+                Button("添加类别") {
+                    let title = newCategoryName.trimmingCharacters(in: .whitespacesAndNewlines)
+                    guard !title.isEmpty else { return }
+                    categories.append(.init(id: "custom_\(UUID().uuidString)", title: title, systemImage: newCategoryIcon, isBuiltIn: false))
+                    newCategoryName = ""
+                    newCategoryIcon = "tag.fill"
+                    persist()
                 }
                 .onDelete(perform: deleteCustomCategory)
             }
 
-            Section("新增类别") {
-                TextField("例如：酒店、流媒体", text: $newCategoryName)
-                Button("添加类别") { addCategory() }
-                    .disabled(newCategoryName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+            Section {
+                Button("重置默认类别") {
+                    RewardCategoryStore.resetToDefault()
+                    categories = RewardCategoryStore.all()
+                }
+                .foregroundStyle(.red)
             }
         }
-        .navigationTitle("类别管理")
+        .navigationTitle("Reward 类别")
         .navigationBarTitleDisplayMode(.inline)
     }
 
-    private func categoryRow(_ category: RewardCategoryItem) -> some View {
-        HStack(spacing: 12) {
-            Image(systemName: category.systemImage)
-                .frame(width: 28)
-            Text(category.title)
-            Spacer()
-            if category.isBuiltIn {
-                Text("内置")
-                    .foregroundStyle(.secondary)
-                    .font(.caption)
-            }
-        }
-        .padding(.vertical, 4)
-    }
-
-    private func addCategory() {
-        let title = newCategoryName.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !title.isEmpty else { return }
-        let id = "custom_\(UUID().uuidString)"
-        customCategories.append(.init(id: id, title: title, systemImage: "tag.fill", isBuiltIn: false))
-        RewardCategoryStore.save(custom: customCategories)
-        newCategoryName = ""
-    }
-
-    private func deleteCustomCategory(at offsets: IndexSet) {
-        customCategories.remove(atOffsets: offsets)
-        RewardCategoryStore.save(custom: customCategories)
+    private func persist() {
+        let valid = categories.filter { !$0.title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }
+        RewardCategoryStore.save(all: valid)
     }
 }
