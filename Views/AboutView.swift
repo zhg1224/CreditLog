@@ -33,7 +33,7 @@ struct AboutView: View {
             }
 
             Section("定位") {
-                Text("CreditLog 是一个帮助用户管理信用卡 reward、查看不同消费类别最佳用卡建议、并逐步接入提醒与 iCloud 同步的 iPhone 应用。")
+                Text("CreditLog 是一个帮助用户管理信用卡 Reward、查看不同消费类别最佳用卡建议、并逐步接入提醒与 iCloud 同步的 iPhone 应用。")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
             }

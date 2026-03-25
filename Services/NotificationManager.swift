@@ -28,17 +28,13 @@ final class NotificationManager {
         removeNotifications(for: card.id)
 
         await scheduleFeeReminder(for: card)
-        await scheduleBenefitReminder(for: card)
         await schedulePaymentReminder(for: card)
-        await scheduleMonthlyReviewReminder(for: card)
     }
 
     func removeNotifications(for cardID: UUID) {
         let identifiers = [
             feeReminderIdentifier(for: cardID),
-            benefitReminderIdentifier(for: cardID),
-            paymentReminderIdentifier(for: cardID),
-            monthlyReviewReminderIdentifier(for: cardID)
+            paymentReminderIdentifier(for: cardID)
         ]
 
         UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: identifiers)
@@ -158,7 +154,7 @@ final class NotificationManager {
 
         let content = UNMutableNotificationContent()
         content.title = "Reward 检查提醒"
-        content.body = "记得检查一下 \(card.name) 的 reward 类别是否有变化。"
+        content.body = "记得检查一下 \(card.name) 的 Reward 类别是否有变化。"
         content.sound = .default
 
         await scheduleNotification(
