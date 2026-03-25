@@ -272,49 +272,6 @@ final class CreditCard: Identifiable {
             }
         }
     }
-
-
-    // MARK: - Legacy uppercase compatibility (temporary)
-    // 兼容误写的属性名，避免旧代码编译报错
-    var RewardType: RewardType {
-        get { rewardType }
-        set { rewardType = newValue }
-    }
-
-    var RewardDining: Double {
-        get { rewardDining }
-        set { rewardDining = newValue }
-    }
-
-    var RewardGroceries: Double {
-        get { rewardGroceries }
-        set { rewardGroceries = newValue }
-    }
-
-    var RewardTransit: Double {
-        get { rewardTransit }
-        set { rewardTransit = newValue }
-    }
-
-    var RewardGas: Double {
-        get { rewardGas }
-        set { rewardGas = newValue }
-    }
-
-    var RewardTravel: Double {
-        get { rewardTravel }
-        set { rewardTravel = newValue }
-    }
-
-    var RewardShopping: Double {
-        get { rewardShopping }
-        set { rewardShopping = newValue }
-    }
-
-    var RewardBills: Double {
-        get { rewardBills }
-        set { rewardBills = newValue }
-    }
 }
 
 enum WelcomeBonusCycle: String, CaseIterable, Identifiable {
@@ -332,6 +289,24 @@ enum WelcomeBonusCycle: String, CaseIterable, Identifiable {
         case .yearly: return "1年"
         }
     }
+}
+
+enum OfferBenefitKind: String, CaseIterable, Identifiable, Codable {
+    case credits
+    case points
+
+    var id: String { rawValue }
+    var title: String { self == .credits ? "Credits" : "Points" }
+}
+
+struct CardOffer: Identifiable, Codable, Hashable {
+    var id: UUID = UUID()
+    var name: String
+    var reminderEnabled: Bool
+    var reminderDate: Date
+    var benefitKind: OfferBenefitKind
+    var benefitValue: Double
+    var note: String
 }
 
 enum OfferBenefitKind: String, CaseIterable, Identifiable, Codable {
