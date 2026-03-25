@@ -16,7 +16,7 @@ struct CategoriesView: View {
             ZStack {
                 Color(.systemGroupedBackground).ignoresSafeArea()
                 if filteredCards.isEmpty {
-                    EmptyStateView(title: "暂无可分析的信用卡", subtitle: "先去 Dashboard 添加信用卡，系统才能计算最佳回报。", systemImage: "square.grid.2x2")
+                    EmptyStateView(title: "暂无可分析的信用卡", subtitle: "先去 Dashboard 添加信用卡，系统才能计算最佳 Reward。", systemImage: "square.grid.2x2")
                         .padding(.horizontal, 24)
                 } else {
                     ScrollView {

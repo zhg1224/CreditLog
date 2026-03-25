@@ -105,7 +105,7 @@ struct AddCardView: View {
     }
 
     private var rewardSection: some View {
-        Section("返利类别") {
+        Section("Reward 类别") {
             ForEach(categoryItems) { category in
                 HStack {
                     Label(category.title, systemImage: category.systemImage)

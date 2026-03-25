@@ -60,7 +60,7 @@ struct CardDetailView: View {
 
                 GlassCard {
                     VStack(alignment: .leading, spacing: 14) {
-                        Text("回报倍率")
+                        Text("Reward 倍率")
                             .font(.headline)
 
                         LazyVGrid(columns: columns, spacing: 12) {

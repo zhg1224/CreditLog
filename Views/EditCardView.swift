@@ -222,7 +222,7 @@ struct EditCardView: View {
     }
 
     private var RewardMultiplierSection: some View {
-        Section("消费返利倍数") {
+        Section("消费 Reward 倍率") {
             RewardField(title: "餐饮", value: decimalBinding($RewardDining))
             RewardField(title: "超市", value: decimalBinding($RewardGroceries))
             RewardField(title: "交通", value: decimalBinding($RewardTransit))
@@ -415,13 +415,13 @@ struct EditCardView: View {
         card.themeName = selectedTheme
         card.customCardImageData = customCardImageData
 
-        card.RewardDining = Double(RewardDining) ?? 1
-        card.RewardGroceries = Double(RewardGroceries) ?? 1
-        card.RewardTransit = Double(RewardTransit) ?? 1
-        card.RewardGas = Double(RewardGas) ?? 1
-        card.RewardTravel = Double(RewardTravel) ?? 1
-        card.RewardShopping = Double(RewardShopping) ?? 1
-        card.RewardBills = Double(RewardBills) ?? 1
+        card.rewardDining = Double(RewardDining) ?? 1
+        card.rewardGroceries = Double(RewardGroceries) ?? 1
+        card.rewardTransit = Double(RewardTransit) ?? 1
+        card.rewardGas = Double(RewardGas) ?? 1
+        card.rewardTravel = Double(RewardTravel) ?? 1
+        card.rewardShopping = Double(RewardShopping) ?? 1
+        card.rewardBills = Double(RewardBills) ?? 1
 
         card.benefitName = trimmedBenefitName
         card.benefitExpiryDate = trimmedBenefitName.isEmpty ? nil : benefitExpiryDate
